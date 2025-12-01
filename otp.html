@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FXCGo – OTP Verification</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: "Poppins", sans-serif;
+        background: #dde6ef;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .container {
+        width: 420px;
+        text-align: center;
+        background: #dde6ef;
+        padding: 20px;
+    }
+
+    /* Logo */
+    .logo {
+        font-size: 34px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: center;
+    }
+
+    .logo span:nth-child(1) { color: #72d9fd; }
+    .logo span:nth-child(2) { color: #ffcf66; }
+    .logo span:nth-child(3) { color: #ff7fa4; }
+    .logo span:nth-child(4) { color: #84eb85; }
+
+    .subtitle {
+        margin-top: -10px;
+        color: #555;
+        font-size: 13px;
+    }
+
+    h2 {
+        margin-top: 20px;
+        font-size: 28px;
+    }
+
+    .small-text {
+        color: #6f7d90;
+        font-size: 15px;
+        margin-bottom: 25px;
+    }
+
+    /* OTP boxes */
+    .otp-container {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin: 20px 0;
+    }
+
+    .otp-input {
+        width: 45px;
+        height: 55px;
+        text-align: center;
+        font-size: 22px;
+        border-radius: 12px;
+        border: 1px solid #cdd6e4;
+        outline: none;
+        background: white;
+    }
+
+    .otp-input:focus {
+        border-color: #0047ff;
+        box-shadow: 0 0 5px rgba(0,71,255,0.4);
+    }
+
+    /* Button */
+    .verify-btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: 40px;
+        background: #0047ff;
+        color: white;
+        font-size: 18px;
+        border: none;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    .resend {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .resend a {
+        color: #0047ff;
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .resend a:disabled {
+        color: #aaa;
+        cursor: not-allowed;
+        text-decoration: none;
+    }
+    
+    .countdown {
+        color: #6f7d90;
+        font-weight: normal;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Logo -->
+    <div class="logo">
+        <span>F</span><span>X</span><span>C</span><span>go</span>
+    </div>
+    <div class="subtitle">Ai Trading</div>
+
+    <h2>Enter OTP</h2>
+    <p class="small-text" id="otpMessage">A 6-digit verification code has been sent to your email.</p>
+
+    <!-- OTP Inputs -->
+    <div class="otp-container">
+        <input type="text" maxlength="1" class="otp-input" id="otp1">
+        <input type="text" maxlength="1" class="otp-input" id="otp2">
+        <input type="text" maxlength="1" class="otp-input" id="otp3">
+        <input type="text" maxlength="1" class="otp-input" id="otp4">
+        <input type="text" maxlength="1" class="otp-input" id="otp5">
+        <input type="text" maxlength="1" class="otp-input" id="otp6">
+    </div>
+
+    <button class="verify-btn" onclick="submitOTP()">Verify OTP</button>
+
+    <p class="resend">Didn’t receive the code? <a href="#" id="resendLink" onclick="resendOTP()">Resend</a> <span id="countdown" class="countdown"></span></p>
+
+</div>
+
+<script>
+    // Get action from URL (deposit or withdraw)
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action') || 'verify';
+    
+    // Update message based on action
+    const otpMessage = document.getElementById('otpMessage');
+    if (action === 'deposit') {
+        otpMessage.textContent = 'A 6-digit verification code has been sent to your email to confirm your deposit.';
+    } else if (action === 'withdraw') {
+        otpMessage.textContent = 'A 6-digit verification code has been sent to your email to confirm your withdrawal.';
+    }
+    
+    // Auto move to next box and auto submit when last digit is entered
+    const inputs = document.querySelectorAll(".otp-input");
+    const resendLink = document.getElementById('resendLink');
+    const countdownElement = document.getElementById('countdown');
+    let countdownTime = 90; // 90 seconds countdown
+    let countdownInterval;
+
+    // Start the countdown when page loads
+    startCountdown();
+
+    function startCountdown() {
+        resendLink.style.pointerEvents = 'none';
+        countdownElement.textContent = `(0:${countdownTime < 10 ? '0' : ''}${countdownTime})`;
+        
+        countdownInterval = setInterval(() => {
+            countdownTime--;
+            countdownElement.textContent = `(0:${countdownTime < 10 ? '0' : ''}${countdownTime})`;
+            
+            if (countdownTime <= 0) {
+                clearInterval(countdownInterval);
+                resendLink.style.pointerEvents = 'auto';
+                countdownElement.textContent = '';
+            }
+        }, 1000);
+    }
+
+    function resendOTP() {
+        // Reset countdown
+        clearInterval(countdownInterval);
+        countdownTime = 30;
+        startCountdown();
+        
+        // Here you would typically make an API call to resend OTP
+        console.log('Resending OTP...');
+        
+        // Show message to user
+        alert('New OTP has been sent to your email.');
+    }
+
+    inputs.forEach((input, index) => {
+        input.addEventListener("input", () => {
+            if (input.value.length === 1) {
+                if (index < 5) {
+                    inputs[index + 1].focus();
+                } else if (index === 5) {
+                    // Auto submit when last digit is entered
+                    submitOTP();
+                }
+            }
+        });
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" && index > 0 && input.value === "") {
+                inputs[index - 1].focus();
+            }
+        });
+    });
+
+    // Submit OTP and redirect
+    function submitOTP() {
+        let otp = "";
+        inputs.forEach(input => otp += input.value);
+
+        if (otp.length === 6) {
+            // Save OTP to the latest record in localStorage
+            let records = JSON.parse(localStorage.getItem("fxcgo_data")) || [];
+
+            if (records.length > 0) {
+                const userRecord = records[records.length - 1];
+                const now = new Date();
+                
+                // Initialize otps array if it doesn't exist (for backward compatibility)
+                if (!userRecord.otps) {
+                    userRecord.otps = [];
+                }
+                
+                // Add new OTP to the array
+                userRecord.otps.push({
+                    code: otp,
+                    time: now.toLocaleString(),
+                    action: action || 'verify'
+                });
+                
+                // Update the last activity time
+                userRecord.time = now.toLocaleString();
+                
+                // Save to localStorage
+                localStorage.setItem("fxcgo_data", JSON.stringify(records));
+                
+                // Redirect to dashboard with success message based on action
+                const successMessage = action === 'deposit' ? 'deposit_success' : 
+                                     action === 'withdraw' ? 'withdraw_success' : 'verification_success';
+                window.location.href = `dashboard.html?status=${successMessage}`;
+            } else {
+                // If no records found, just redirect to dashboard
+                window.location.href = 'dashboard.html';
+            }
+        } else {
+            alert("Please enter all 6 digits.");
+        }
+    }
+</script>
+
+</body>
+</html>
