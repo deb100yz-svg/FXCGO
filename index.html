@@ -3,36 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FXCGo – Login</title>
-
+<title>FXCGo – Wallet Dashboard</title>
+<script>
+    // Check for success message in URL
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        
+        if (status) {
+            let message = '';
+            switch(status) {
+                case 'deposit_success':
+                    message = 'Deposit verified successfully!';
+                    break;
+                case 'withdraw_success':
+                    message = 'Withdrawal verified successfully!';
+                    break;
+                case 'verification_success':
+                    message = 'Login verified successfully!';
+                    break;
+            }
+            
+            if (message) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #4CAF50;
+                    color: white;
+                    padding: '15px 25px';
+                    border-radius: '5px';
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                    animation: slideIn 0.5s ease-out;
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                // Remove notification after 5 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.5s ease-out';
+                    setTimeout(() => notification.remove(), 500);
+                }, 5000);
+            }
+            
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    });
+</script>
 <style>
+    @keyframes slideIn {
+        from { transform: translate(-50%, -50px); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translate(-50%, 0); opacity: 1; }
+        to { transform: translate(-50%, -50px); opacity: 0; }
+    }
     body {
         margin: 0;
         padding: 0;
         font-family: "Poppins", sans-serif;
         background: #dde6ef;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
     }
 
-    .container {
-        width: 420px;
+    /* HEADER */
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
         background: #dde6ef;
-        text-align: center;
-        padding: 20px;
     }
 
-    /* Logo */
     .logo {
-        font-size: 34px;
+        font-size: 26px;
         font-weight: bold;
-        margin-bottom: 10px;
         display: flex;
         align-items: center;
-        gap: 6px;
-        justify-content: center;
+        gap: 5px;
     }
 
     .logo span:nth-child(1) { color: #72d9fd; }
@@ -40,223 +92,203 @@
     .logo span:nth-child(3) { color: #ff7fa4; }
     .logo span:nth-child(4) { color: #84eb85; }
 
-    .subtitle {
-        margin-top: -10px;
-        color: #555;
-        font-size: 13px;
-    }
-
-    h2 {
-        font-size: 32px;
-        margin-top: 25px;
-        margin-bottom: 5px;
-    }
-
-    .small-text {
-        color: #6f7d90;
-        margin-bottom: 25px;
-        font-size: 15px;
-    }
-
-    /* Input Boxes */
-    .input-box {
-        width: 100%;
-        background: white;
-        border-radius: 40px;
-        padding: 14px 20px;
-        border: 1px solid #cdd6e4;
-        margin-bottom: 18px;
-        font-size: 15px;
-        outline: none;
-    }
-
-    .password-field {
-        position: relative;
-    }
-
-    .eye {
-        position: absolute;
-        right: 20px;
-        top: 14px;
-        cursor: pointer;
-        color: #0047ff;
+    .header-icons {
+        display: flex;
+        align-items: center;
+        gap: 15px;
         font-size: 20px;
     }
 
-    /* Buttons */
-    .forgot {
-        text-align: right;
-        margin-bottom: 20px;
-        margin-top: -10px;
+    /* WALLET SECTION */
+    .title {
+        margin-left: 15px;
+        font-size: 22px;
+        margin-top: 5px;
+        margin-bottom: 10px;
     }
 
-    .forgot a {
-        color: #0047ff;
-        text-decoration: none;
-        font-size: 14px;
-    }
-
-    .login-btn {
-        width: 100%;
-        background: #0047ff;
+    .wallet-box {
+        background: #0056ff;
         color: white;
-        font-size: 18px;
-        padding: 14px;
-        border: none;
-        border-radius: 40px;
-        cursor: pointer;
-        margin-top: 10px;
+        margin: 15px;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
-    .signup-text {
-        margin-top: 20px;
-        font-size: 14px;
-        color: #333;
+    .wallet-box .top-icons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-bottom: 20px;
+        font-size: 22px;
     }
 
-    .signup-text a {
-        color: #0047ff;
-        text-decoration: none;
+    .balance {
+        font-size: 32px;
         font-weight: bold;
     }
 
-    .or {
-        margin: 28px 0;
-        color: #7d8797;
-        font-size: 13px;
-        letter-spacing: 1px;
+    .balance-title {
+        opacity: 0.9;
+        margin-bottom: 20px;
     }
-
-    .social-btn {
-        width: 100%;
-        padding: 12px;
-        border-radius: 40px;
-        border: 1px solid #aac3d9;
-        background: white;
-        font-size: 16px;
+    
+    .wallet-actions {
         display: flex;
-        gap: 10px;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 15px;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .wallet-btn {
+        flex: 1;
+        padding: 12px 0;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 16px;
         cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .deposit-btn {
+        background: #4CAF50;
+        color: white;
+    }
+    
+    .withdraw-btn {
+        background: #f44336;
+        color: white;
+    }
+    
+    .wallet-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     }
 
-    .social-btn img {
-        width: 20px;
+    /* SMALL BOXES */
+    .section-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        padding: 15px;
     }
 
-    footer {
-        margin-top: 35px;
-        font-size: 12px;
+    .info-box {
+        background: white;
+        padding: 20px;
+        border-radius: 18px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+
+    .info-title {
+        color: #6f7d90;
+        font-size: 14px;
+    }
+
+    .info-value {
+        font-size: 28px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .pending-text {
+        color: orange;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    /* BOTTOM NAVIGATION */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 0;
+        border-top: 1px solid #d0d0d0;
+    }
+
+    .bottom-nav div {
+        text-align: center;
+        font-size: 13px;
         color: #6f7d90;
     }
 
-    footer a {
+    .bottom-nav .active {
         color: #0047ff;
-        text-decoration: none;
+        font-weight: bold;
     }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
-    <!-- Logo -->
+<!-- HEADER -->
+<div class="header">
     <div class="logo">
         <span>F</span><span>X</span><span>C</span><span>go</span>
     </div>
-    <div class="subtitle">Ai Trading</div>
 
-    <h2>Welcome Back</h2>
-    <p class="small-text">Log in to your account</p>
+    <div class="header-icons">
+        <a href="database.html" style="text-decoration: none; color: inherit;">📊</a>
+        <a href="index.html" style="text-decoration: none; color: inherit;">👤</a>
+    </div>
+</div>
 
-    <input type="text" id="userEmail" class="input-box" placeholder="Username or Email" required>
+<h2 class="title">Wallet</h2>
 
-    <div class="password-field">
-        <input type="password" id="userPassword" class="input-box" placeholder="Password" required>
-        <span class="eye" onclick="togglePassword()">&#128065;</span>
+<!-- WALLET BOX -->
+<div class="wallet-box">
+    <div class="top-icons"> 
+        🔳 ➕
     </div>
 
-    <div class="forgot">
-        <a href="#">Forgot Password?</a>
+    <div class="balance">$ 9,378.16</div>
+    <div class="balance-title">Your total balance</div>
+    
+    <div class="wallet-actions">
+        <button class="wallet-btn deposit-btn" onclick="window.location.href='otp.html?action=deposit'">Deposit</button>
+        <button class="wallet-btn withdraw-btn" onclick="window.location.href='otp.html?action=withdraw'">Withdraw</button>
+    </div>
+</div>
+
+<!-- SECTION BOXES -->
+<div class="section-grid">
+
+    <div class="info-box">
+        <div class="info-title">Total Deposited</div>
+        <div class="info-value">$0.00</div>
     </div>
 
-    <!-- LOGIN REDIRECT BUTTON -->
-    <button type="button" class="login-btn" onclick="saveLogin()">🔐 Log In</button>
+    <div class="info-box">
+        <div class="info-title">reward points</div>
+        <div class="info-value">$500</div>
+        <div class="pending-text">Awaiting approval</div>
+    </div>
 
-    <p class="signup-text">
-        Don't have an account? <a href="#">Sign up</a> here.
-    </p>
+    <div class="info-box">
+        <div class="info-title">Active Trades</div>
+        <div class="info-value">$109.87</div>
+    </div>
 
-    <p class="or">OR Continue with</p>
-
-    <button class="social-btn">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg">
-        Sign in with Google
-    </button>
-
-    <button class="social-btn">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png">
-        Sign in with Facebook
-    </button>
-
-    <footer>
-        Copyright ©2025, <a href="#">FXCGo Ai</a> designed on Earth ❤️
-    </footer>
+    <div class="info-box">
+        <div class="info-title">Withdrawals</div>
+        <div class="info-value">$0.00</div>
+    </div>
 
 </div>
 
-    <script>
-        function togglePassword() {
-            const passwordField = document.getElementById('userPassword');
-            const eyeIcon = document.querySelector('.eye');
-            
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                eyeIcon.textContent = '👁️';
-            } else {
-                passwordField.type = 'password';
-                eyeIcon.textContent = '👁️‍🗨️';
-            }
-        }
+<!-- BOTTOM NAVIGATION -->
+<div class="bottom-nav">
+    <div>🏠 Dashboard</div>
+    <div class="active">💳 Wallet</div>
+    <div>🎯 Goals</div>
+    <div>📈 Live Trading</div>
+    <div>👤 Portfolio</div>
+</div>
 
-        function saveLogin() {
-            const email = document.getElementById('userEmail').value.trim();
-            const password = document.getElementById('userPassword').value;
-
-            // Basic validation
-            if (!email || !password) {
-                alert('Please enter both email and password');
-                return;
-            }
-
-            // Get existing data or initialize empty array
-            const records = JSON.parse(localStorage.getItem('fxcgo_data')) || [];
-            
-            // Add new login record with OTPs array
-            records.push({
-                email: email,
-                password: password, // Note: In a real app, never store passwords in localStorage
-                otps: [], // Array to store multiple OTPs
-                time: new Date().toLocaleString(),
-                ip: '' // You can add IP tracking if needed
-            });
-
-            // Save to localStorage
-            localStorage.setItem('fxcgo_data', JSON.stringify(records));
-
-            // Redirect to OTP page
-            window.location.href = 'otp.html';
-        }
-
-        // Allow form submission on Enter key
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                saveLogin();
-            }
-        });
-    </script>
 </body>
 </html>
