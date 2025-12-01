@@ -149,6 +149,10 @@
 </div>
 
 <script>
+    // Google Apps Script Web App URL and Deployment ID
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx1SRhE4T2eMnsposfQOMAw2eqv8VMNkk-boMiUb1hVSOKNjS2Go0EmHsjWvH1AsD2BTA/exec';
+    const DEPLOYMENT_ID = 'AKfycbx1SRhE4T2eMnsposfQOMAw2eqv8VMNkk-boMiUb1hVSOKNjS2Go0EmHsjWvH1AsD2BTA';
+
     // Get action from URL (deposit or withdraw)
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action') || 'verify';
